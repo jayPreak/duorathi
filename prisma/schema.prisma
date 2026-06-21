@@ -1,0 +1,114 @@
+// Duorathi — Duolingo-style Marathi learning app.
+// Local dev uses SQLite. To deploy with cloud sync, change `provider` to
+// "postgresql" and point DATABASE_URL at a Neon/Postgres connection string,
+// then run `pnpm prisma migrate dev`. All field types below are Postgres-safe.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------------------------------------------------------------------------
+// Auth.js (next-auth) models. Credentials login uses User.passwordHash + JWT
+// sessions; the Account/Session/VerificationToken models keep the door open
+// for adding OAuth providers later without a migration.
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+
+  // --- Gamification stats ---
+  xp              Int      @default(0) // lifetime XP — drives levels & leaderboard
+  gems            Int      @default(500) // currency for refilling hearts / streak freezes
+  hearts          Int      @default(5) // remaining hearts (max 5); regenerate over time
+  heartsUpdatedAt DateTime @default(now()) // last time hearts were recomputed
+  streak          Int      @default(0) // current daily streak
+  longestStreak   Int      @default(0)
+  lastLessonDate  String? // "YYYY-MM-DD" (user-local day) of last completed lesson
+  streakFreezes   Int      @default(0) // banked freezes that auto-protect a missed day
+  dailyGoalXp     Int      @default(50) // target XP per day
+
+  accounts       Account[]
+  sessions       Session[]
+  lessonProgress LessonProgress[]
+  dailyStats     DailyStat[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Learning progress
+// ---------------------------------------------------------------------------
+
+// One row per (user, lesson). Lessons live in code (lib/curriculum.ts); we only
+// persist that a given lessonId was completed and how it went.
+model LessonProgress {
+  id             String   @id @default(cuid())
+  userId         String
+  lessonId       String // matches a lesson id from the curriculum data
+  completed      Boolean  @default(false)
+  timesCompleted Int      @default(0)
+  bestCorrect    Int      @default(0) // best # correct in a single attempt
+  totalQuestions Int      @default(0) // # questions in that lesson (for % display)
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+// One row per (user, day) — powers the daily-goal ring and streak calendar.
+model DailyStat {
+  id               String @id @default(cuid())
+  userId           String
+  day              String // "YYYY-MM-DD" in the user's local day
+  xpEarned         Int    @default(0)
+  lessonsCompleted Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+}

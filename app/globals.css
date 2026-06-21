@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Duolingo-flavored palette */
+@theme {
+  --color-feather: #58cc02; /* primary green */
+  --color-feather-dark: #58a700; /* green button shadow */
+  --color-mask: #89e219;
+  --color-macaw: #1cb0f6; /* blue */
+  --color-macaw-dark: #1899d6;
+  --color-cardinal: #ff4b4b; /* red / hearts */
+  --color-fox: #ff9600; /* orange / streak */
+  --color-beetle: #ce82ff; /* purple */
+  --color-bee: #ffc800; /* yellow / gems */
+  --color-snow: #ffffff;
+  --color-polar: #f7f7f7; /* page bg */
+  --color-swan: #e5e5e5; /* borders */
+  --color-hare: #afafaf; /* muted text */
+  --color-wolf: #777777;
+  --color-eel: #4b4b4b; /* body text */
+
+  --font-deva: var(--font-deva);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: var(--color-snow);
+  color: var(--color-eel);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Marathi / Devanagari text */
+.deva {
+  font-family: var(--font-deva), var(--font-sans), system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+/* Chunky pressable buttons with a bottom "edge", Duolingo style. */
+.btn-3d {
+  border-radius: 16px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: none;
+  transition: filter 0.1s, transform 0.05s;
+  user-select: none;
+}
+.btn-3d:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none !important;
+}
+.btn-3d:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
