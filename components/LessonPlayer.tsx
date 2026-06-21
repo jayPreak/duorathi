@@ -64,12 +64,14 @@ export default function LessonPlayer({
   exercises,
   startingHearts,
   maxHearts,
+  nextLessonId,
 }: {
   lessonId: string;
   title: string;
   exercises: Exercise[];
   startingHearts: number;
   maxHearts: number;
+  nextLessonId: string | null;
 }) {
   const router = useRouter();
   const total = exercises.length;
@@ -177,7 +179,7 @@ export default function LessonPlayer({
 
   // ---------------- render: results / failed ----------------
   if (phase === "results" && result) {
-    return <Results result={result} title={title} />;
+    return <Results result={result} title={title} nextLessonId={nextLessonId} />;
   }
   if (phase === "failed") {
     return <OutOfHearts failedMidLesson />;
@@ -560,9 +562,11 @@ function MatchView({
 function Results({
   result,
   title,
+  nextLessonId,
 }: {
   result: CompleteLessonResult;
   title: string;
+  nextLessonId: string | null;
 }) {
   const router = useRouter();
   return (
@@ -593,14 +597,30 @@ function Results({
 
       <button
         onClick={() => {
-          router.push("/learn");
-          router.refresh();
+          if (nextLessonId) {
+            router.push(`/lesson/${nextLessonId}`);
+          } else {
+            router.push("/learn");
+            router.refresh();
+          }
         }}
         className="btn-3d mt-10 w-full max-w-sm bg-feather py-3.5 text-white"
         style={{ boxShadow: "0 4px 0 var(--color-feather-dark)" }}
       >
-        Continue
+        {nextLessonId ? "Next lesson →" : "Back to lessons"}
       </button>
+
+      {nextLessonId && (
+        <button
+          onClick={() => {
+            router.push("/learn");
+            router.refresh();
+          }}
+          className="mt-3 text-sm font-bold text-wolf underline"
+        >
+          Exit to lesson map
+        </button>
+      )}
     </div>
   );
 }

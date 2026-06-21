@@ -3,6 +3,7 @@ import { getCurrentUserState } from "@/lib/user-state";
 import { COURSE, LESSON_SEQUENCE } from "@/lib/curriculum";
 import DailyGoalRing from "@/components/DailyGoalRing";
 import Boosters from "@/components/Boosters";
+import ScrollToCurrent from "@/components/ScrollToCurrent";
 
 export default async function LearnPage() {
   const state = await getCurrentUserState();
@@ -35,6 +36,7 @@ export default async function LearnPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollToCurrent />
       {/* Top cards */}
       <div className="grid gap-4 sm:grid-cols-2">
         <DailyGoalRing
@@ -90,6 +92,7 @@ export default async function LearnPage() {
                     key={lesson.id}
                     style={{ transform: `translateX(${offset}px)` }}
                     className="flex flex-col items-center"
+                    {...(status === "current" ? { "data-current-lesson": "true" } : {})}
                   >
                     <LessonNode
                       lessonId={lesson.id}

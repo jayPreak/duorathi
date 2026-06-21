@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUserState } from "@/lib/user-state";
-import { getLessonRef } from "@/lib/curriculum";
+import { getLessonRef, LESSON_SEQUENCE } from "@/lib/curriculum";
 import LessonPlayer from "@/components/LessonPlayer";
 
 export default async function LessonPage({
@@ -16,6 +16,8 @@ export default async function LessonPage({
   const ref = getLessonRef(lessonId);
   if (!ref) redirect("/learn");
 
+  const nextLessonId = LESSON_SEQUENCE[ref.order + 1]?.lesson.id ?? null;
+
   return (
     <LessonPlayer
       lessonId={ref.lesson.id}
@@ -23,6 +25,7 @@ export default async function LessonPage({
       exercises={ref.lesson.exercises}
       startingHearts={state.hearts}
       maxHearts={state.maxHearts}
+      nextLessonId={nextLessonId}
     />
   );
 }
