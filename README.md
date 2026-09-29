@@ -92,6 +92,16 @@ Marketplace):
    the Vercel project's environment variables.
 4. Run `pnpm prisma migrate deploy` against the new database.
 
+## Admin account
+
+The app has no separate admin role — every account is a regular `User` row.
+Sign up at `/signup` with these credentials to use as the admin/owner login:
+
+```
+username: admin@duorathi.app
+password: gHZimIde7VMoPiM4Y5EM
+```
+
 ## Project map
 
 ```
